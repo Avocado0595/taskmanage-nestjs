@@ -121,3 +121,53 @@ handle something => communicate service (interact with database)
         providers:[TasksService, LoggerService]
     })
 ```
+11. install uuid
+12. controller: @Body(key?: string) <=>	req.body / req.body[key] => input key nếu ko muốn get cả object
+13. DTO (data transfer object)
+data flow: http request send object {title, description} => controller recive object {title, description}
+=> call service function => service: add data to db, return result to controller => controller send response to client
+**object {title, description}: DTO (not a model)
+**using class
+**example: 
+```ts
+class CreateShippingDto{
+    orderId: string;
+    shippingAddress: string;
+    requiredSignature: boolean;
+}
+```
+=> túm lại: dùng DTO này để việc truyền data giữa các layer được thống nhất hơn.
+
+14. Pipes (same middlewares?)
+- process arguments before calling controller
+- perform data transformation or validation
+- return original or modified data
+- throw exception if data is invalid
+- can be asynchronous
+- ValidationPipe: validate dto data, ParseIntPipe: convert string to number
+- CustomPipe:
+- use pipes: 
+    + handle-level: @UsePipes(ValidationPipe)
+    + parameter-level: @Param('id') id: string, @UsePipes(ValidationPipe)
+    + global pipes: app.useGlobalPipes(somePipe)
+- chose level?
+    + parameter: slimmer, cleaner. However: extra code, hard maintain
+    + handler: more code, greate benefits:
+        + do not require extra code at param level
+        + easy maintain
+        + indentify params
+        + promote usage DTOs
+        + 
+*****series này dạy postgresql - lười cài nên dùng mysql ^^
+15. TypeORM
+16. Active Record and Data Mapper
+- Active Record:
+    + extends baseEntity
+    + have method: find, findOne,...
+    + for simple
+- Data Mapper:
+    + declare class entity
+    + set up Repository: extends Repository<EntityName>
+    + for maintain
+** app.module : use TypeOrmModule.forRoot
+** task.module : use TypeOrmModule.forFeature([UserEntity, TaskEntity])
