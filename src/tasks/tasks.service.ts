@@ -16,6 +16,7 @@ export class TasksService {
     private tasksRepo: TaskRepository) {}
 
   getAllTasks(user:User):Promise<Task[]> {
+    console.log('start');
     return this.tasksRepo.find({where: {user: user}});
   }
 

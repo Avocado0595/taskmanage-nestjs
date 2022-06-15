@@ -241,4 +241,48 @@ export const GetUser = createParamDecorator((_data, ctx: ExecutionContext):User=
 cần config thêm: nestInterceptor - instanceToPlain (file: transform.inerceptor)
 
 23. Socket.io - app chat
- - 
+![ERD DB CHAT SIMPLE](public/erd-app-chat-simple.png)
+25. Custom AuthGuard
+```ts
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest();//get request từ http
+    console.log(request.handshake);
+    return true;
+  }
+}
+//use: @UseGuards(AuthGuard)
+```
+25. Dùng configService trong Module
+```ts
+import { ConfigModule, ConfigService } from "@nestjs/config"
+
+export class JwtConfig{ //tạo class base
+    static getJwtConfig(configService: ConfigService){ //phương thức static, init ConfigService
+      return { //return giá trị cần sử dụng
+        secret: configService.get('SECRET_ACCESSTOKEN'),
+          signOptions:{
+            expiresIn: 36000,
+          }
+      }
+  }
+}
+  
+  export const jwtConfigAsync = { //dùng useFactory để inject ConfigService
+    imports:[ConfigModule],
+    useFactory: async (configService: ConfigService): Promise<JwtConfig>=>JwtConfig.getJwtConfig(configService),
+    inject: [ConfigService]
+  }
+
+  //sử dụng
+  JwtModule.registerAsync(jwtConfigAsync),
+```
+26. Lỗi EntityRepository deprecated: tạo các file sau để dùng CustomDecorator
+- typeorm-ex.decorator.ts
+- typeorm-ex.module.ts

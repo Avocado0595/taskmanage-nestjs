@@ -8,6 +8,7 @@ export class AuthController {
     constructor(private authService: AuthService) {}
     @Post('/signup')
     async signup(@Body() authCredetialDto: AuthCredentialDto, @Res({passthrough: true}) res:Response): Promise<void>{
+        
         this.logger.log(`Create ${authCredetialDto.username}`)
         const token =  await this.authService.signup(authCredetialDto);
         res.cookie("accessToken", token.accessToken, {httpOnly: true, maxAge: 300000});

@@ -1,9 +1,19 @@
 import { User } from "./user.entity";
-import {EntityRepository, Repository} from 'typeorm';
+import { Repository} from 'typeorm';
 import { AuthCredentialDto } from "./dto/auth-credential.dto";
 import { ConflictException, InternalServerErrorException } from "@nestjs/common";
 import * as bcrypt from 'bcrypt';
-@EntityRepository(User)
+import { CustomRepository } from "src/config/typeorm-ex.decorator";
+// @CustomRepository(User)
+// export class UserRepository extends Repository<User> {
+//     // public async getAllPhoto() {
+//     //     const query = this.createQueryBuilder('photo')
+//     //         .where('photo.isPublished = :isPublished', { isPublished: true })
+//     //     const photos = await query.getMany()
+//     //     return photos
+//     // }
+// }
+@CustomRepository(User)
 export class UsersRepository extends Repository<User>{
     async createUser(authCredentialDto: AuthCredentialDto):Promise<User>{
         const {username, password} = authCredentialDto;
