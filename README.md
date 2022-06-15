@@ -171,3 +171,74 @@ class CreateShippingDto{
     + for maintain
 ** app.module : use TypeOrmModule.forRoot
 ** task.module : use TypeOrmModule.forFeature([UserEntity, TaskEntity])
+17. authentication:  verify who are you
+18. authorization: give somebody permission depend on their indentity
+19. JWT = header (meta data: type, hashing algorithm) + payload (data: user, ...) + signature (encoded header, encoded payload, secret key)
+20. Sử dụng JWT trong nestjs
+- install: @nestjs/jwt, passport, passport-jwt
+- import auth.module
+```ts
+imports:[
+  PassportModule.register({defaultStrategy: 'jwt'}),
+  JwtModule.register({
+    secret: 'đặt 1 private key ở đây',
+    signOptions:{
+      expiresIn: 3600, //thời gian hết hạn của token
+    }
+  })],
+```
+- get token: const accessToken: string =  this.jwtService.sign(payload);
+- verify token:
+    + install: @types/passport-jwt
+```ts
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy){
+    constructor(@InjectRepository(UsersRepository)
+    private userRepository: UsersRepository){
+        super({
+            secretOrKey: 'private', //add lại secret key ở đây
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),//extract token từ (bearer) header
+        })
+    }
+
+    async validate(payload:JwtPayload): Promise<string>{ //method overload từ PassportStrategy,
+    // sẽ verify token, decode => payload
+        const{username} = payload;
+        const user: User = await this.userRepository.findOne({username});
+        if(!user){
+            throw new UnauthorizedException();
+        }
+
+        return "user"; //cái này sẽ trả về request => request này trả về object tên là user ????
+        //2 dòng này để loại pasword ra khỏi request trả về
+        const { password, ...result } = user;
+        return result;
+    }
+}
+```
+    +  @UseGuards(AuthGuard()) => đặt middleware này để verify token trước roite nào cần authorization
+- decorator để lấy data từ request sau khi verify token
+```ts
+export const GetUser = createParamDecorator((_data, ctx: ExecutionContext):User=>{
+    const req = ctx.switchToHttp().getRequest(); //get data từ request
+    return req.user; //chỉ lấy user từ token
+})
+```
+21. Relationship
+```
+@ManyToOne(_type=>User, user=>user.tasks, {eager: false})
+    user: User;
+```
+{eager: true} => eager loading: load data from other table
+
+22. @Exclude
+```ts
+@ManyToOne(_type=>User, user=>user.tasks, {eager: false})
+    @Exclude({toPlainOnly: true})
+    user: User;
+```
+đoạn này loại bỏ cột user trong task khi trả về plain object: json
+cần config thêm: nestInterceptor - instanceToPlain (file: transform.inerceptor)
+
+23. Socket.io - app chat
+ - 
