@@ -216,7 +216,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     }
 }
 ```
-    +  @UseGuards(AuthGuard()) => đặt middleware này để verify token trước roite nào cần authorization
+    +  @UseGuards(AuthGuard()) => đặt middleware này để verify token trước rồi nào cần authorization
 - decorator để lấy data từ request sau khi verify token
 ```ts
 export const GetUser = createParamDecorator((_data, ctx: ExecutionContext):User=>{

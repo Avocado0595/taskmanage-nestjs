@@ -5,5 +5,9 @@ export class CreateTaskDto{
     
     @IsNotEmpty()
     description: string;
+
+    startTime: Date;
+    
+    endTime: Date;
 }
 

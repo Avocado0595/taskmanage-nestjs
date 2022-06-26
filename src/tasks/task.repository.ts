@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { User } from 'src/auth/user.entity';
 import { CustomRepository } from 'src/config/typeorm-ex.decorator';
 import {Repository} from 'typeorm';
@@ -9,8 +10,14 @@ import { Task } from './task.entity';
 @CustomRepository(Task)
 export class TaskRepository extends Repository<Task>{
     async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task>{
-        const {title, description} = createTaskDto;
-        const task = this.create({title, description, user, status: TaskStatus.OPEN});
+        if(createTaskDto.endTime)
+        {
+            const endTime = new Date(createTaskDto.endTime.toString());
+            if(endTime < new Date() || endTime == new Date())
+                throw new BadRequestException('Endtime must be in after today.')
+        }
+        
+        const task = this.create({...createTaskDto, user, status: TaskStatus.OPEN});
         return await this.save(task);
     }
 
@@ -26,5 +33,14 @@ export class TaskRepository extends Repository<Task>{
         }
         const task = await query.getMany();
         return task;
+    }
+    async updateMissedTasks(user:User){
+        const query = this.createQueryBuilder();
+        await query.update(Task)
+        .where({user})
+        .andWhere("task.status = :status1 OR task.status = :status2",{status1: TaskStatus.OPEN, status2: TaskStatus.IN_PROGRESS})
+        .andWhere("task.endTime < :today",{today: new Date()})
+        .set({status: TaskStatus.MISSED})
+        .execute()
     }
 }

@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
             jwtFromRequest: ExtractJwt.fromExtractors([(request:Request) => {
                 const reqFromSocket = (request as any).handshake;
                 if(reqFromSocket){
-                    const data = reqFromSocket.headers.cookie.split(';')[0].split('=')[1];
+                    const data = reqFromSocket.headers['cookie'].split('=')[1];
                     if(!data){
                         return null;
                     }
@@ -34,7 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         })
     }
 
-    async validate(payload:JwtPayload): Promise<Omit<User, 'password'>>{
+    async validate(payload:JwtPayload): Promise<Partial<User>>{
         
         const{username} = payload;
         const user: User = await this.userRepository.findOneBy({username});
@@ -42,7 +42,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
             throw new UnauthorizedException();
         }
 
-        const { password, ...result } = user;
+        const { password,tasks, ...result } = user;
         return result;
     }
 }

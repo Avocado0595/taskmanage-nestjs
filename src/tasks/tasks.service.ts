@@ -15,8 +15,8 @@ export class TasksService {
     @InjectRepository(TaskRepository)
     private tasksRepo: TaskRepository) {}
 
-  getAllTasks(user:User):Promise<Task[]> {
-    console.log('start');
+  async getAllTasks(user:User):Promise<Task[]> {
+    await this.tasksRepo.updateMissedTasks(user);
     return this.tasksRepo.find({where: {user: user}});
   }
 
@@ -25,6 +25,7 @@ export class TasksService {
   }
 
   async getTaskById(id:string, user: User):Promise<Task>{
+    await this.tasksRepo.updateMissedTasks(user);
     const found = await this.tasksRepo.findOneBy({id, user});
     if(!found){
       throw new NotFoundException(`Task with id: ${id} not found.`);
@@ -44,8 +45,9 @@ export class TasksService {
       throw new NotFoundException(`Task with id: ${id} not found.`);
   }
 
-  filterTask(filterTaskDto:FilterTaskDto, user: User):Promise<Task[]>{
-    return this.tasksRepo.getTasks(filterTaskDto, user);
+  async filterTask(filterTaskDto:FilterTaskDto, user: User):Promise<Task[]>{
+    await this.tasksRepo.updateMissedTasks(user);
+    return await this.tasksRepo.getTasks(filterTaskDto, user);
   }
 
   async updateStatus(id:string, status: TaskStatus):Promise<void>{

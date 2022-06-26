@@ -15,13 +15,12 @@ export class TasksController {
   private logger = new Logger();
   constructor(private tasksService: TasksService) {}
   @Get('/')
-  getTasks(@Query() filterTaskDto:FilterTaskDto, @GetUser() user:User):Promise<Task[]> {
-    console.log(user);
+  async getTasks(@Query() filterTaskDto:FilterTaskDto, @GetUser() user:User): Promise<{data: Task[]}> {
     if(Object.keys(filterTaskDto).length){
-      return this.tasksService.filterTask(filterTaskDto, user);
+      return {data: await this.tasksService.filterTask(filterTaskDto, user)};
     }
     else{
-      return this.tasksService.getAllTasks(user);
+      return {data: await this.tasksService.getAllTasks(user)};
     }
   }
 

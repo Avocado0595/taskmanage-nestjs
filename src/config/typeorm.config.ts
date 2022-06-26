@@ -1,9 +1,9 @@
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { User } from "src/auth/user.entity";
-import { Message } from "src/chat/message/message.entity";
-import { Room } from "src/chat/room/room.entity";
-import { UserRoom } from "src/chat/user-room/user_room.entity";
+import { Message } from "src/tesst/message/message.entity";
+import { Room } from "src/tesst/room/room.entity";
+import { UserRoom } from "src/tesst/user-room/user_room.entity";
 import { Task } from "src/tasks/task.entity";
 
 
