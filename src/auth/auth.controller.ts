@@ -1,11 +1,16 @@
-import { Body, Controller, Logger, Patch, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Logger, Patch, Post, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialDto } from './dto/auth-credential.dto';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import path from 'path';
+import {join, resolve} from 'path';
 import { v4 } from 'uuid';
+import { GetUser } from './get-user.decorator';
+import { userInfo } from 'os';
+import { User } from './user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import Resize from 'src/utils/resize-image';
 @Controller('auth')
 export class AuthController {
     private logger = new Logger();
@@ -26,19 +31,23 @@ export class AuthController {
         res.cookie("accessToken", token.accessToken, {httpOnly: true, maxAge: 1000*60*60*24*7});
         return;
     }
-
+    @UseGuards(AuthGuard())
     @Patch('avatar/update')
-    @UseInterceptors(FileInterceptor('avatar', {
-        storage: diskStorage({
-          destination: 'D:\\DOCUMENT\\PROJECT101\\TodoFullStack\\nestjs\\task-management\\public\\avatars',
-          filename: function (req, file, cb) {
-            cb(null, Date.now() + '.jpg') 
-          }
-          
-        })
-      }))
-    async updateAvatar(@UploadedFile() file: Express.Multer.File): Promise<void>{
-        console.log(file);
+    @UseInterceptors(FileInterceptor('avatar'))
+    async updateAvatar(@UploadedFile() file: Express.Multer.File, @GetUser() user: User): Promise<void>{
+        const imagePath = join(resolve(), '/public/avatars');
+        const fileUpload = new Resize(imagePath);
+        const avatarPath = await fileUpload.save(file.buffer);
+        await this.authService.updateAvatar({userId: user.id, avatar: avatarPath});
         return;
     }
 }
+
+/*
+, {
+        storage: diskStorage({
+            destination: join(resolve(),'/public/avatars'),
+            filename:  (_req, _res, cb)=> cb(null, v4() + '.png')
+        })
+    }
+ */

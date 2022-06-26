@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './user.repository';
 import { JwtPayload } from './jwt-payload.interface';
 import { User } from './user.entity';
+import { AvartarUpdateDto } from './dto/avatar-update.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,5 +32,10 @@ export class AuthService {
         else{
             throw new UnauthorizedException('Login fail.');
         }
+    }
+
+    async updateAvatar(avatarupdateDto: AvartarUpdateDto){
+        const {userId:id, avatar} = avatarupdateDto;
+        return await this.userRepository.update({id},{avatar});
     }
 }

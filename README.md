@@ -286,3 +286,14 @@ export class JwtConfig{ //tạo class base
 26. Lỗi EntityRepository deprecated: tạo các file sau để dùng CustomDecorator
 - typeorm-ex.decorator.ts
 - typeorm-ex.module.ts
+27. Upload file
+- install: multer
+- middleware:
+```ts
+ @UseInterceptors(FileInterceptor('avatar', {
+        storage: diskStorage({
+            destination: join(resolve(),'/public/avatars'),
+            filename:  (_req, _res, cb)=> cb(null, v4() + '.png')
+        })
+    }))
+```

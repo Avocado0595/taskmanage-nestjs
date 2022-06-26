@@ -6,13 +6,14 @@ import { ConfigModule } from '@nestjs/config';
 import {typeOrmConfigAsync} from './config/typeorm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-//import { ChatGateway } from './messages/chat.gateway';
-// import { TypeOrmExModule } from './config/typeorm-ex.module';
-// import { UsersRepository } from './auth/user.repository';
+import {join, resolve} from 'path'
 import { MessagesModule } from './messages/messages.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
-  imports: [
+  imports: [ServeStaticModule.forRoot({
+    rootPath: join(resolve(), '/public'),
+  }),
     ConfigModule.forRoot({isGlobal:true, envFilePath:[`.env`]}),
     TypeOrmModule.forRootAsync(typeOrmConfigAsync),
     TasksModule,
