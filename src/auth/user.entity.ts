@@ -15,7 +15,7 @@ export class User{
     @Column()
     email: string;
 
-    @Column()
+    @Column({default:''})
     avatar: string
 
     @OneToMany(_type=>Task, task => task.user, {eager: true})

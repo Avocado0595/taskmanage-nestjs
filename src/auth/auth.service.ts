@@ -15,13 +15,14 @@ export class AuthService {
     private jwtService: JwtService){}
 
     async signup(authCredentialDto: AuthCredentialDto):Promise<{accessToken: string}>{
+        
         const user:User = await this.userRepository.createUser(authCredentialDto);
         const payload: JwtPayload = {username: user.username, id: user.id};
         const accessToken: string =  this.jwtService.sign(payload,{expiresIn: '1d'});
         return {accessToken};
     }
 
-    async signin(authCredentialDto: AuthCredentialDto):Promise<{accessToken: string}>{
+    async signin(authCredentialDto: Omit<AuthCredentialDto,"email">):Promise<{accessToken: string}>{
         const {username, password} = authCredentialDto;
         const user = await this.userRepository.findOneBy({username});
         if(user && (await bcrypt.compare(password, user.password))){
