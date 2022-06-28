@@ -7,6 +7,7 @@ import { UsersRepository } from './user.repository';
 import { JwtPayload } from './jwt-payload.interface';
 import { User } from './user.entity';
 import { AvartarUpdateDto } from './dto/avatar-update.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,21 +15,21 @@ export class AuthService {
     private userRepository: UsersRepository,
     private jwtService: JwtService){}
 
-    async signup(authCredentialDto: AuthCredentialDto):Promise<{accessToken: string}>{
+    async signup(authCredentialDto: AuthCredentialDto):Promise<{accessToken: string,  user: UserResponseDto}>{
         
-        const user:User = await this.userRepository.createUser(authCredentialDto);
+        const {password,...user} = await this.userRepository.createUser(authCredentialDto);
         const payload: JwtPayload = {username: user.username, id: user.id};
         const accessToken: string =  this.jwtService.sign(payload,{expiresIn: '1d'});
-        return {accessToken};
+        return {accessToken, user};
     }
 
-    async signin(authCredentialDto: Omit<AuthCredentialDto,"email">):Promise<{accessToken: string}>{
+    async signin(authCredentialDto: Omit<AuthCredentialDto,"email">):Promise<{accessToken: string, user: UserResponseDto}>{
         const {username, password} = authCredentialDto;
-        const user = await this.userRepository.findOneBy({username});
-        if(user && (await bcrypt.compare(password, user.password))){
+        const {password:userPassword, ...user} = await this.userRepository.findOneBy({username});
+        if(user && (await bcrypt.compare(password, userPassword))){
             const payload: JwtPayload = {username: user.username, id: user.id};
             const accessToken: string =  this.jwtService.sign(payload,{expiresIn: '1d'});
-            return {accessToken};
+            return {accessToken, user};
         }
         else{
             throw new UnauthorizedException('Login fail.');

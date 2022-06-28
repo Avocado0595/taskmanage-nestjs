@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { Task } from "src/tasks/task.entity";
 import { Entity, PrimaryGeneratedColumn,Column, OneToMany } from "typeorm";
 
@@ -19,5 +20,6 @@ export class User{
     avatar: string
 
     @OneToMany(_type=>Task, task => task.user, {eager: true})
+    @Exclude({toPlainOnly: true})
     tasks: Task[];
 }
